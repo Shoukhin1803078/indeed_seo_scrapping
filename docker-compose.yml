@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  scraper:
+    build: .
+    container_name: airregi_scraper
+    restart: "no"
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./data:/app/data
+
+    # command: scrapy crawl airregi

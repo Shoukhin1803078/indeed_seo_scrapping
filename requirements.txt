@@ -1,0 +1,4 @@
+scrapy 
+scrapy-playwright
+python-dotenv
+pandas
