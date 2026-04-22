@@ -56,7 +56,7 @@ class AirRegiFormRequestSpider(scrapy.Spider):
             "password": PASSWORD,
         }
 
-        self.logger.info(f" Sending FormRequest: {formdata}")
+        # self.logger.info(f" Sending FormRequest: {formdata}")
 
         # STEP 3: SUBMIT LOGIN
         try:
