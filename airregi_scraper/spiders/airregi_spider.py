@@ -145,42 +145,96 @@ class AirRegiFormRequestSpider(scrapy.Spider):
 
 
 
-        #  STEP 2: Build Date Range
-        # date1 = "2000/1/11"
+        # #  STEP 2: Build Date Range
+        # # date1 = "2026/04/22"
+
+        # today = datetime.today()
+        # yesterday = today - timedelta(days=1)
+        # date1 = f"{yesterday.year}/{yesterday.month}/{yesterday.day}"
+        # date2 = f"{today.year}/{today.month}/{today.day}"
+        # date_range = f"{date1} - {date2}"
+
+        # self.logger.info(f"DATE RANGE: {date_range}")
+
+
+        # # STEP 3: Set Date (React input)
+
+        # await page.wait_for_selector("input[data-la='entries_search_calendar_input']")
+
+        # await page.evaluate(
+        #     """(value) => {
+        #         const input = document.querySelector("input[data-la='entries_search_calendar_input']");
+        #         input.removeAttribute('readonly');
+        #         input.value = value;
+
+        #         input.dispatchEvent(new Event('input', { bubbles: true }));
+        #         input.dispatchEvent(new Event('change', { bubbles: true }));
+        #     }""",
+        #     date_range,
+        # )
+
+        # await page.evaluate("""
+        # () => {
+        #     const input = document.querySelector("input[data-la='entries_search_calendar_input']");
+        #     input.blur();
+        # }
+        # """)
+
+        # self.logger.info("Date range applied")
+
+        # await page.wait_for_timeout(2000)
+
+        # # STEP 3.5: Click Search button (text-based)
+
+        # await page.locator("button:has-text('検索')").click()
+        # # await page.get_by_role("button", name="検索").click()
+        # # await page.locator("text=検索").click()
+        # # search_btn = page.locator("text=検索")
+        # # # self.logger.info(f"SEARCH BUTTON: {search_btn}")
+
+        # # await search_btn.wait_for(state="visible")
+        # # self.logger.info("=========SEARCH BUTTON VISIBLE=========")
+        # # await search_btn.click()
+
+        # self.logger.info("=========Search button clicked=========")
+
+        # # Wait for data refresh (important)
+        # await page.wait_for_timeout(5000)
+
+        # # Optional (if needed to trigger filter)
+        # # await page.keyboard.press("Enter")
+        # # await page.click("body")
+
+
+
+
+
+
+        # STEP 2: Build timestamp range (IMPORTANT FIX)
 
         today = datetime.today()
         yesterday = today - timedelta(days=1)
-        date1 = f"{yesterday.year}/{yesterday.month}/{yesterday.day}"
-        date2 = f"{today.year}/{today.month}/{today.day}"
-        date_range = f"{date1} - {date2}"
 
-        self.logger.info(f"DATE RANGE: {date_range}")
+        start_ts = int(yesterday.timestamp() * 1000)
+        end_ts = int(today.timestamp() * 1000)
+
+        self.logger.info(f"TIMESTAMP RANGE: {start_ts} - {end_ts}")
 
 
-        # STEP 3: Set Date (React input)
 
-        await page.wait_for_selector("input[data-la='entries_search_calendar_input']")
-
-        await page.evaluate(
-            """(value) => {
-                const input = document.querySelector("input[data-la='entries_search_calendar_input']");
-                input.removeAttribute('readonly');
-                input.value = value;
-
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-            }""",
-            date_range,
+        await page.goto(
+            f"https://ats.rct.airwork.net/entries"
+            f"?page=1"
+            f"&selectionStatus=00"
+            f"&entryResponseTrigger=00"
+            f"&searchWord="
+            f"&interviewStartDate={start_ts}"
+            f"&interviewEndDate={end_ts}"
         )
-
-        self.logger.info("Date range applied")
-
-        # Wait for data refresh (important)
-        await page.wait_for_timeout(3000)
-
-        # Optional (if needed to trigger filter)
-        # await page.keyboard.press("Enter")
-        # await page.click("body")
+        await page.wait_for_selector("h1.styles_heading__3b3pw")
+        # IMPORTANT: wait for data table or loader finish (if exists)
+        await page.wait_for_timeout(2000)
+        self.logger.info("Entries page loaded with date filter")
 
 
         # STEP 4: Download CSV
@@ -206,7 +260,7 @@ class AirRegiFormRequestSpider(scrapy.Spider):
             "message": "Dashboard confirmed",
             "home": home,
             "file_path": file_path,
-            "date_range": date_range,
+            # "date_range": date_range,
         }
 
 
